@@ -1,6 +1,6 @@
-# WARP.md
+# AGENTS.md
 
-This file provides guidance to WARP (warp.dev) when working with code in this repository.
+This file provides guidance to agents when working with code in this repository.
 
 ## Project commands
 
@@ -22,6 +22,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
   - npm test (runs Vitest test suite)
   - npm run test:ui (opens Vitest UI for interactive testing)
   - npm run test:coverage (generates coverage in coverage/ with text, lcov, html; thresholds enforced)
+  - npm run test:quick (quick subset used by pre-commit)
   - Coverage thresholds: statements ≥ 80%, functions ≥ 80%, lines ≥ 80%, branches ≥ 70%
   - Test files located in src/components/__tests__/, src/hooks/__tests__/, and src/utils/__tests__/
   - UI tests cover ChessBoard, GameControls, ConfirmationDialog, ErrorBoundary, and DnD flows (ChessSquare/ChessPiece)
@@ -80,7 +81,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 ## Notes
 
 - Package manager: npm (package-lock.json present)
-- Husky pre-commit hook runs lint and a quick subset of tests (install via: npm run prepare)
-- CI: GitHub Actions runs lint + tests with coverage and uploads to Codecov (badge in README)
+- Husky pre-commit hook runs lint and npm run test:quick (install via: npm run prepare)
+- CI: GitHub Actions runs lint + tests with coverage; Codecov upload is conditional on CODECOV_TOKEN secret (badge in README)
 - README.md includes quickstart (npm install, npm run dev/build/preview/lint) and feature overview
 

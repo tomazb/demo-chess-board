@@ -1,0 +1,52 @@
+# PRD — Izdelek: Sodobna šahovska igra
+
+## Povzetek
+- Interaktivna šahovska aplikacija v brskalniku z jasnim UX, dostopnostjo in popolnimi pravili igre.
+- Podprte poteze: rokiranje, en passant, promocija kmeta, zakonitost potez z zaznavo šaha/mata/pata, zgodovina potez v SAN.
+- Uporabniški nadzor: Reset, Undo, Redo z ustreznimi omejitvami in potrditvenimi dialogi.
+
+## Cilji
+- Omogočiti igranje šaha med dvema igralcema na eni napravi (lokalno, izmenjava potez).
+- Zagotoviti pravilno izvajanje šahovskih pravil in jasne povratne informacije o stanju igre.
+- Poskrbeti za dostopnost (tipkovnica, fokus, statusi), stabilnost in testno pokritost.
+
+## Ključne funkcionalnosti
+- Rokiranje (kraljeva/damina stran) z validacijo poti in varnosti (`getKingMoves`: `src/utils/moveValidation.ts:200`).
+- En passant generiranje in izvedba, vključno z simulacijo zajema pri preverjanju zakonitosti (`isEnPassantMove`, `isMoveLegal`: `src/utils/moveValidation.ts:451`, `src/utils/moveValidation.ts:386`).
+- Promocija kmeta z dialogom in izborom figure (`PromotionDialog`: `src/components/PromotionDialog.tsx:15`; akcije `REQUEST_PROMOTION`/`COMPLETE_PROMOTION`: `src/hooks/useChessGame.ts:158`, `src/hooks/useChessGame.ts:167`).
+- Zaznava šaha, mata in pata (`computeGameStatus`, `isCheckmate`, `isStalemate`: `src/utils/moveValidation.ts:435`, `src/utils/moveValidation.ts:423`, `src/utils/moveValidation.ts:429`).
+- Zgodovina potez v SAN s razločevanjem, zajemi, rokiranje ter indikatorji `+`/`#` (`generateAlgebraicNotation`: `src/utils/chessUtils.ts:317`).
+- Undo/Redo z natančno obnovo stanj (`UNDO_MOVE`/`REDO_MOVE`: `src/hooks/useChessGame.ts:244`, `src/hooks/useChessGame.ts:299`).
+- Reset igre z potrditvenim dialogom (`ConfirmationDialog`: `src/components/ConfirmationDialog.tsx:5`; sprožitev v `GameControls`: `src/components/GameControls.tsx:14`).
+
+## Uporabniške zgodbe
+- Kot igralec želim izbrati figuro in videti veljavne poteze, da lažje igram (`SELECT_SQUARE`: `src/hooks/useChessGame.ts:24`).
+- Kot igralec želim potezo izvesti z miško (povleci/spusti) ali tipkovnico (Enter/Space), da je nadzor dostopen (`ChessSquare`: `src/components/ChessSquare.tsx:84`).
+- Kot igralec želim jasno videti stanje igre (aktivna/šah/mat/pat), da razumem rezultat (`GameControls`: `src/components/GameControls.tsx:36`).
+- Kot igralec želim razveljaviti in ponovno izvesti poteze, da preučim potek igre (`UNDO_MOVE`/`REDO_MOVE`: `src/hooks/useChessGame.ts:244`, `src/hooks/useChessGame.ts:299`).
+- Kot igralec želim potrditi reset, da ne izgubim napredka nenamerno (`ConfirmationDialog` in `GameControls`: `src/components/ConfirmationDialog.tsx:5`, `src/components/GameControls.tsx:60`).
+- Kot igralec želim izvesti promocijo kmeta z jasno izbiro figure, da dokončam potezo (`PromotionDialog`: `src/components/PromotionDialog.tsx:15`).
+
+## Funkcionalne zahteve
+- Generiranje veljavnih potez za vse tipe figur, vključno s posebnimi pravili (`getValidMoves`: `src/utils/moveValidation.ts:14`).
+- Filtriranje potez, ki puščajo lastnega kralja v šahu (`isMoveLegal`: `src/utils/moveValidation.ts:386`).
+- Upravljanje pravic rokiranja brez mutacij vhodov (`updateCastlingRightsForMove`: `src/utils/chessUtils.ts:131`).
+- Sledenje stanja za Undo/Redo, vključno s `prevHasMoved`, zajetimi figurami, pravicami rokiranja in en passant (`Move` tip: `src/types/chess.ts:20`).
+- SAN notacija z razločevanjem, zajemi, rokiranje, promocija, en passant, indikatorski sufiksi (`generateAlgebraicNotation`: `src/utils/chessUtils.ts:317`).
+
+## Nefunkcionalne zahteve
+- Dostopnost: fokusna past v dialogih, upravljanje s tipkovnico, ARIA oznake (`PromotionDialog`: `src/components/PromotionDialog.tsx:43`; `ConfirmationDialog`: `src/components/ConfirmationDialog.tsx:50`).
+- Testna pokritost: enotski in integracijski testi za pravila, UI interakcije in A11y (`src/utils/__tests__`, `src/components/__tests__`, `src/hooks/__tests__`).
+- Zanesljivost: nemutiranje vhodnih struktur v util funkcijah, varno rokovanje z napakami v DnD (`ChessPiece`: `src/components/ChessPiece.tsx:11`; `ChessSquare`: `src/components/ChessSquare.tsx:35`).
+- Performanse: preprosta reprezentacija plošče `Board` (8×8), minimalna ponovna izrisovanja preko lokalne `useReducer` logike.
+
+## Omejitve in predpostavke
+- En igralec na potezo, brez mrežne igre ali AI nasprotnika.
+- Ni shranjevanja med sejami; stanje je v pomnilniku.
+- Vizualni sloj uporablja Tailwind CSS utility razrede; brez kompleksnih animacij zunaj dialogov.
+
+## Merila sprejema
+- Vse posebne poteze (rokiranje, en passant, promocija) delujejo skladno s pravili šaha in testi so zeleni.
+- Status igre se pravilno posodablja po vsaki potezi/razveljavitvi (`computeGameStatus`: `src/utils/moveValidation.ts:435`).
+- Dostopnost dialogov: tipkovnična navigacija, fokusna past, Escape preklic, obnovitev fokusa.
+- Zgodovina potez prikazuje veljavno SAN notacijo v UI (`GameControls`: `src/components/GameControls.tsx:83`).

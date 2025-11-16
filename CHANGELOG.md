@@ -1,201 +1,201 @@
-# Changelog
+# Dnevnik sprememb
 
-All notable changes to this project will be documented in this file.
+Vse pomembne spremembe tega projekta so dokumentirane v tej datoteki.
 
-## 2025-09-02 - Checkmate Detection Bug Fix
+## 2025-09-02 - Popravek napake pri zaznavi mat-a
 
-### Fixed
-- Corrected piece type validation in `isKingInCheck` function to properly detect check scenarios
-- Fixed checkmate detection by ensuring accurate check validation in move legality assessment
-- Improved sliding piece attack detection with unified logic for bishops, rooks, and queens
+### Popravljeno
+- Popravljena validacija vrste figure v funkciji `isKingInCheck` za pravilno zaznavanje šaha
+- Popravljena zaznava mat-a z natančnejšo preverbo šaha pri oceni zakonitosti potez
+- Izboljšana zaznava napadov drsečih figur z enotno logiko za lovce, trdnjave in dame
 
-## 2025-09-02 - Promotion Dialog A11y Focus Trap
+## 2025-09-02 - Dostopnost (A11y) dialoga za promocijo: fokusna past
 
-### Added
-- Focus trap for PromotionDialog: Tab/Shift+Tab now cycle within the dialog; previous focus restored on close
-- UI test verifies Tab/Shift+Tab wrapping and Escape-to-cancel behavior
+### Dodano
+- Fokusna past za PromotionDialog: Tab/Shift+Tab krožita znotraj dialoga; prejšnji fokus se ob zapiranju obnovi
+- UI test preverja zavijanje Tab/Shift+Tab in vedenje preklica z Escape
 
-### PRs
+### PR-ji
 - #11
 
-## 2025-09-02 - Pawn Promotion Flow & UI
+## 2025-09-02 - Potek promocije kmeta in uporabniški vmesnik
 
-### Added
-- Pawn promotion flow with pendingPromotion in game state and REQUEST_PROMOTION/COMPLETE_PROMOTION/CANCEL_PROMOTION actions
-- Accessible PromotionDialog with keyboard navigation (Arrow keys, Enter/Space), Escape to cancel, and live status announcements
-- Integration tests: hook-level promotion flow (undo/redo) and UI-level dialog interactions
+### Dodano
+- Potek promocije kmeta z `pendingPromotion` v stanju igre in akcijami `REQUEST_PROMOTION`/`COMPLETE_PROMOTION`/`CANCEL_PROMOTION`
+- Dostopen PromotionDialog z navigacijo po tipkovnici (puščice, Enter/Space), Escape za preklic in sprotnimi oznanili stanja
+- Integracijski testi: potek promocije na ravni hook-ov (undo/redo) in interakcije dialoga na ravni UI
 
-### Changed
-- Reducer updated to detect promotion on pawn reaching back rank and to execute promotion with correct SAN (e.g., e8=Q, exd8=Q)
-- Redo logic ensures promoted piece type is restored on redo
+### Spremenjeno
+- Posodobljen reducer za zaznavo promocije, ko kmet doseže zadnjo vrsto, in izvedbo promocije s pravilnim SAN (npr. e8=Q, exd8=Q)
+- Logika ponovne izvedbe (redo) zagotavlja, da se vrsta promovirane figure pri ponovni izvedbi obnovi
 
-### Documentation
-- README updated to move Pawn promotion into implemented rules
-- WARP.md updated to include PromotionDialog and new actions/state
-- Technical Architecture and Requirements documents updated to mark promotion implemented
+### Dokumentacija
+- README posodobljen: promocija kmeta prestavljena med implementirana pravila
+- WARP.md posodobljen z PromotionDialog in novimi akcijami/stanjema
+- Dokumenta Tehnična arhitektura in Zahteve posodobljena, promocija označena kot implementirana
 
-## 2025-09-02 - En Passant Support & Tests; Castling Rights Fix
+## 2025-09-02 - Podpora en passant in testi; popravek pravic rokiranja
 
-### Added
-- En passant support in move legality simulation (isMoveLegal now removes captured pawn during e.p. simulation)
-- Unit tests for en passant move generation (utils/moveValidation.test.ts)
-- Integration test covering en passant execution and undo/redo (hooks/useChessGame.test.ts)
+### Dodano
+- Podpora en passant v simulaciji zakonitosti poteze (funkcija `isMoveLegal` zdaj med simulacijo odstrani ujetega kmeta)
+- Enotski testi (unit) za generiranje potez en passant (`utils/moveValidation.test.ts`)
+- Integracijski test, ki pokriva izvedbo en passant in undo/redo (`hooks/useChessGame.test.ts`)
 
-### Fixed
-- Castling rights update function no longer mutates inputs; correctly updates rights based on captured rook color
+### Popravljeno
+- Funkcija za posodobitev pravic rokiranja ne mutira vhodov; pravilno posodobi pravice glede na barvo ujete trdnjave
 
-### Documentation
-- README: En passant moved from Future Enhancements to implemented game rules
-- WARP.md: updated to state en passant implemented
-- Technical Architecture: Section 16 marked Implemented with details
-- Requirements: En passant requirements marked Implemented
+### Dokumentacija
+- README: en passant prestavljen iz prihodnjih izboljšav med implementirana pravila igre
+- WARP.md: posodobljeno, da je en passant implementiran
+- Tehnična arhitektura: razdelek 16 označen kot implementiran z podrobnostmi
+- Zahteve: zahteve za en passant označene kot implementirane
 
-### Chore
-- Add coverage thresholds to vitest.config.ts (statements/lines/functions ≥ 80%, branches ≥ 70%)
-- ESLint config fixed to use plugin: extends
+### Vzdrževanje
+- Dodani pragovi pokritosti v `vitest.config.ts` (stavki/vrstice/funkcije ≥ 80 %, vejitve ≥ 70 %)
+- Popravljena konfiguracija ESLint za uporabo `plugin:` v `extends`
 
-## 2025-09-01 - Complete Documentation Update
+## 2025-09-01 - Celovita posodobitev dokumentacije
 
-### Documentation
-- Updated all documentation to accurately reflect the complete implementation:
-  - **Technical Architecture Document**:
-    - Added Section 12: Endgame Detection with checkmate/stalemate functions
-    - Added Section 13: Standard Algebraic Notation (SAN) System
-    - Added Section 14: User Experience Enhancements (confirmation dialogs)
-    - Updated component hierarchy to include ConfirmationDialog and UI types
-    - Added getPawnAttacks() to check detection section
-  - **Requirements Document**:
-    - Added Section 10: Endgame Detection Requirements (all implemented ✅)
-    - Added Section 11: Move Notation Requirements (SAN implementation ✅)
-    - Added Section 12: User Confirmation Requirements (reset dialog ✅)
-    - Updated status display to reflect checkmate/stalemate/check indicators
-    - Updated move history to mention Standard Algebraic Notation
-    - Added Section 13: Undo/Redo Requirements (fully implemented)
-    - Added Section 14: Castling Requirements (fully implemented)
-    - Fixed contradictory statements about castling implementation
+### Dokumentacija
+- Posodobljena vsa dokumentacija, da natančno odraža celotno implementacijo:
+  - **Dokument Tehnična arhitektura**:
+    - Dodan razdelek 12: Zaznava končnice s funkcijami za mat/pat
+    - Dodan razdelek 13: Sistem standardne algebrske notacije (SAN)
+    - Dodan razdelek 14: Izboljšave uporabniške izkušnje (potrditveni dialogi)
+    - Posodobljena hierarhija komponent, vključuje ConfirmationDialog in UI tipe
+    - Dodan `getPawnAttacks()` v razdelek zaznave šaha
+  - **Dokument Zahteve**:
+    - Dodan razdelek 10: Zahteve za zaznavo končnice (vse implementirane ✅)
+    - Dodan razdelek 11: Zahteve za notacijo potez (implementacija SAN ✅)
+    - Dodan razdelek 12: Zahteve za uporabniško potrditev (reset dialog ✅)
+    - Posodobljen prikaz stanja, da prikazuje indikatorje mat/pat/šah
+    - Posodobljena zgodovina potez z omembo standardne algebrske notacije
+    - Dodan razdelek 13: Zahteve za razveljavitev/ponovno izvedbo (v celoti implementirano)
+    - Dodan razdelek 14: Zahteve za rokiranje (v celoti implementirano)
+    - Odpravljene nasprotujoče si navedbe o implementaciji rokiranja
   - **WARP.md**:
-    - Added endgame detection functions to move validation section
-    - Added generateAlgebraicNotation() to utils documentation
-    - Added ConfirmationDialog component to app composition
-    - Updated GameControls description to include SAN notation and endgame status
-    - Added redoHistory to state management
-    - Documented that castling is fully implemented
-    - Added REDO_MOVE action to documented actions
+    - Dodane funkcije zaznave končnice v razdelek validacije potez
+    - Dodan `generateAlgebraicNotation()` v dokumentacijo utils
+    - Dodana komponenta ConfirmationDialog v sestavo aplikacije
+    - Posodobljen opis GameControls, vključuje SAN notacijo in stanje končnice
+    - Dodan `redoHistory` v upravljanje stanja
+    - Dokumentirano, da je rokiranje v celoti implementirano
+    - Dodana akcija `REDO_MOVE` v dokumentirane akcije
 
-## 2025-09-01 - Confirmation Dialog UX & SSR Improvements
+## 2025-09-01 - Izboljšave UX potrditvenega dialoga in SSR
 
-### Changed
-- Remove global Enter-to-confirm; rely on focused button to avoid accidental or double confirmation.
-- Store dialog handlers in refs; main effect depends only on `isOpen` to prevent re-subscribe and focus flicker.
-- SSR-safe portal mount via `mounted` guard; return `null` on server or before mount.
-- Exit animation for smooth fade-out/scale, with delayed unmount to allow transition.
+### Spremenjeno
+- Odstranjen globalni Enter-za-potrditev; zanašanje na fokusiran gumb za preprečitev nenamernih ali dvojnih potrditev.
+- Handlerje dialoga shranjujemo v `refs`; glavni učinek je odvisen le od `isOpen`, da se prepreči ponovno naročanje in utripanje fokusa.
+- Varnostna namestitev portala za SSR prek zaščite `mounted`; vrne `null` na strežniku ali pred namestitvijo.
+- Izhodna animacija za gladko bledenje/skaliranje z zakasnjenim odklopom, da omogoči prehod.
 
-### Chore
-- Move `ConfirmationDialogProps` from chess domain types to `src/types/ui.ts`.
+### Vzdrževanje
+- Premik `ConfirmationDialogProps` iz tipov domene šaha v `src/types/ui.ts`.
 
-## 2025-09-01 - Reset Confirmation & SAN Notation
+## 2025-09-01 - Potrditev reset in SAN notacija
 
-### Added
-- Reusable, accessible ConfirmationDialog component and integration into GameControls. Reset now shows a confirmation dialog before clearing the game.
-- Standard Algebraic Notation (SAN) in move history with disambiguation, captures, castling, and check/checkmate indicators.
-- SAN generator support for future promotions and en passant formatting.
+### Dodano
+- Ponovno uporabna, dostopna komponenta ConfirmationDialog in integracija v GameControls. Reset zdaj prikaže potrditveni dialog pred čiščenjem igre.
+- Standardna algebrska notacija (SAN) v zgodovini potez z razločevanjem, ujemi, rokiranje in indikatorji šah/mat.
+- Podpora generatorja SAN za prihodnje promocije in formatiranje en passant.
 
-### Changed
-- Pawn attack detection uses diagonal-only attack generator for accurate check detection.
-- Game status now sets 'check' when applicable (not just active/checkmate/stalemate).
-- Undo is allowed after game end to let users step back from checkmate/stalemate positions.
+### Spremenjeno
+- Zaznava napadov kmeta uporablja zgolj diagonalni generator napadov za natančno zaznavo šaha.
+- Stanje igre zdaj nastavi 'šah' kjer je ustrezno (ne le aktivno/mat/pat).
+- Undo je dovoljen po koncu igre, da lahko uporabniki korakajo nazaj iz položajev mat/pat.
 
-### Documentation
-- Updated README.md with SAN move history and reset confirmation dialog details.
+### Dokumentacija
+- Posodobljen `README.md` s SAN zgodovino potez in podrobnostmi potrditvenega dialoga reset.
 
-## 2025-09-01 - Endgame Detection
+## 2025-09-01 - Zaznava končnice
 
-### Added
-- Checkmate and stalemate detection via `isCheckmate`, `isStalemate`, and `hasAnyLegalMoves` (utils/moveValidation.ts).
+### Dodano
+- Zaznava mat-a in pat-a prek `isCheckmate`, `isStalemate` in `hasAnyLegalMoves` (`utils/moveValidation.ts`).
 
-### Changed
-- hooks/useChessGame.ts now sets `gameStatus` automatically after each move and undo; `isInCheck` reflects the player to move.
-- components/GameControls.tsx displays explicit endgame messages and a "Check!" warning while active; disables Undo after the game ends.
+### Spremenjeno
+- `hooks/useChessGame.ts` zdaj samodejno nastavlja `gameStatus` po vsaki potezi in razveljavitvi; `isInCheck` odraža igralca na potezi.
+- `components/GameControls.tsx` prikazuje jasna sporočila o končnici in opozorilo "Šah!" med igro; onemogoči Undo po koncu igre.
 
-### Documentation
-- Updated README.md to reflect endgame detection and control behavior.
+### Dokumentacija
+- Posodobljen `README.md`, da odraža zaznavo končnice in vedenje kontrol.
 
-## 2025-09-01 - Documentation Accuracy Update
+## 2025-09-01 - Posodobitev natančnosti dokumentacije
 
-### Documentation
-- Fixed critical inaccuracies in project documentation to reflect actual implementation:
+### Dokumentacija
+- Odpravljene ključne netočnosti v dokumentaciji projekta, da odražajo dejansko implementacijo:
   - **WARP.md**: 
-    - Corrected statement that tests are not configured (tests ARE configured with Vitest)
-    - Updated move validation section to reflect that check detection IS fully implemented
-    - Added documentation for castling rights management functions
-    - Added ErrorBoundary component to interaction boundaries section
-    - Added input validation utilities documentation
-  - **Technical Architecture Document**:
-    - Added missing `CastlingRights` interface to type definitions
-    - Updated `Move` interface to include undo-related fields (`prevHasMoved`, `prevCapturedHasMoved`, `prevCastlingRights`)
-    - Updated `GameState` interface to include `castlingRights` field
-    - Added ErrorBoundary to component hierarchy
-    - Added new Testing Architecture section documenting Vitest setup
-    - Clarified that check detection is implemented (section 10)
-  - **Requirements Document**:
-    - Updated constraints section to clarify castling rights ARE tracked (but moves not implemented)
-    - Added checkmarks to show check detection requirements are met
-    - Added new Testing Requirements section
+    - Popravljena trditev, da testi niso konfigurirani (testi SO konfigurirani z Vitest)
+    - Posodobljen razdelek validacije potez, da odraža, da je zaznava šaha v celoti implementirana
+    - Dodana dokumentacija za funkcije upravljanja pravic rokiranja
+    - Dodana komponenta ErrorBoundary v razdelek meja interakcij
+    - Dodana dokumentacija za pripomočke za validacijo vnosa
+  - **Dokument Tehnična arhitektura**:
+    - Dodan manjkajoči vmesnik `CastlingRights` v definicije tipov
+    - Posodobljen vmesnik `Move` z polji povezanimi z razveljavitvijo (`prevHasMoved`, `prevCapturedHasMoved`, `prevCastlingRights`)
+    - Posodobljen vmesnik `GameState` z dodanim poljem `castlingRights`
+    - Dodan ErrorBoundary v hierarhijo komponent
+    - Dodan nov razdelek Testna arhitektura, ki dokumentira nastavitev Vitest
+    - Počistili, da je zaznava šaha implementirana (razdelek 10)
+  - **Dokument Zahteve**:
+    - Posodobljen razdelek omejitev, da pojasni, da se pravice rokiranja SPREMLJAJO (poteze pa niso implementirane)
+    - Dodani kljukice, ki kažejo, da so zahteve za zaznavo šaha izpolnjene
+    - Dodan nov razdelek Zahteve testiranja
 
-## 2025-09-01 - Castling and Redo Implementation
+## 2025-09-01 - Implementacija rokiranja in ponovne izvedbe (redo)
 
-### Added
-- Full castling functionality for both king-side and queen-side castling
-- Castling move validation in `getKingMoves` function with comprehensive checks:
-  - Castling rights verification (king and rook haven't moved)
-  - Path clearance validation (no pieces between king and rook)
-  - Safety validation (king not in check, doesn't move through check, doesn't end in check)
-- Castling move execution in game reducer:
-  - Automatic rook movement when king castles
-  - Proper castling rights updates
-  - Undo support for castling moves (restores both king and rook positions)
-- Standard Algebraic Notation support for castling (O-O for king-side, O-O-O for queen-side)
-- Complete redo functionality:
-  - `redoHistory` array tracks undone moves
-  - `REDO_MOVE` action re-executes undone moves
-  - Redo button in GameControls with proper enable/disable logic
-  - Full state restoration including castling moves
+### Dodano
+- Polna funkcionalnost rokiranja na kraljevi in damini strani
+- Validacija rokiranja v funkciji `getKingMoves` s celovitimi preverjanji:
+  - Preverjanje pravic rokiranja (kralj in trdnjava se nista premaknila)
+  - Preverjanje prostosti poti (ni figur med kraljem in trdnjavo)
+  - Preverjanje varnosti (kralj ni v šahu, ne gre skozi šah, ne konča v šahu)
+- Izvedba rokiranja v game reducerju:
+  - Samodejen premik trdnjave ob rokiraju kralja
+  - Pravilne posodobitve pravic rokiranja
+  - Podpora za razveljavitev rokiranja (obnovi poziciji kralja in trdnjave)
+- Podpora SAN za rokiranje (O-O za kraljevo stran, O-O-O za damino stran)
+- Popolna funkcionalnost ponovne izvedbe (redo):
+  - Tabela `redoHistory` sledi razveljavljenim potezam
+  - Akcija `REDO_MOVE` ponovno izvede razveljavljene poteze
+  - Gumb Redo v GameControls z ustrezno logiko omogočanja/onemogočanja
+  - Popolna obnova stanja, vključno z rokirnimi potezami
 
-### Changed
-- Updated `getKingMoves` function to accept `castlingRights` parameter
-- Enhanced `getValidMoves` function to pass castling rights to king move validation
-- Modified game reducer to handle castling move execution and undo operations
+### Spremenjeno
+- Posodobljena funkcija `getKingMoves`, ki sprejme parameter `castlingRights`
+- Izboljšana funkcija `getValidMoves`, ki posreduje pravice rokiranja validaciji kraljevih potez
+- Spremenjen game reducer za obravnavo izvedbe rokiranja in operacij razveljavitve
 
-### Documentation
-- Updated README.md to include castling in implemented features and game rules
-- Added castling instructions to "How to Play" section
-- Removed castling from "Future Enhancements" list
-- Updated all technical documentation to reflect castling and redo implementation
+### Dokumentacija
+- Posodobljen `README.md`, vključuje rokiranje med implementirane funkcije in pravila igre
+- Dodana navodila za rokiranje v "Kako igrati"
+- Rokiranje odstranjeno s seznama "Prihodnje izboljšave"
+- Posodobljena vsa tehnična dokumentacija, ki odraža implementacijo rokiranja in redo
 
-## 2025-09-01 - Initial Implementation
+## 2025-09-01 - Začetna implementacija
 
-### Added
-- Comprehensive drag-and-drop input validation.
-  - components/ChessPiece.tsx: validate and sanitize square on dragstart; prevent invalid drags; try/catch and error logging.
-  - components/ChessSquare.tsx: validate drag data (isValidDragData) and both squares (isValidSquare) on drop; prevent same-square drops; try/catch with error logging.
-- Error boundary for graceful error handling.
-  - components/ErrorBoundary.tsx: reusable error boundary with fallback UI and Reset button; logs errors via componentDidCatch.
-  - components/ChessBoard.tsx: wrap board grid and file labels with ErrorBoundary.
-- Testing infrastructure and unit tests.
-  - Added Vitest config and scripts; devDependencies include vitest, @vitest/ui, jsdom, and @testing-library/react.
-  - src/hooks/__tests__/useChessGame.test.ts: tests for undo behavior, captures, rook/king moves affecting castling rights, captured rook effects, and restoration on undo.
-  - src/utils/__tests__/chessUtils.test.ts: tests for castling rights helpers and updates, including captured rook scenarios.
+### Dodano
+- Celovita validacija vnosa povleci-in-spusti.
+  - `components/ChessPiece.tsx`: validacija in sanacija polja ob začetku vlečenja; preprečevanje neveljavnih vlečenj; `try/catch` in beleženje napak.
+  - `components/ChessSquare.tsx`: validacija podatkov vlečenja (`isValidDragData`) in obeh polj (`isValidSquare`) ob spustu; preprečevanje spustov na isto polje; `try/catch` z beleženjem napak.
+- Meja napak (ErrorBoundary) za elegantno obravnavo napak.
+  - `components/ErrorBoundary.tsx`: ponovno uporabna meja napak z nadomestnim UI in gumbom Reset; beleži napake prek `componentDidCatch`.
+  - `components/ChessBoard.tsx`: ovije mrežo plošče in oznake datotek z ErrorBoundary.
+- Testna infrastruktura in enotski testi.
+  - Dodana konfiguracija in skripti Vitest; `devDependencies` vključujejo `vitest`, `@vitest/ui`, `jsdom` in `@testing-library/react`.
+  - `src/hooks/__tests__/useChessGame.test.ts`: testi za vedenje razveljavitve, ujeme, poteze trdnjave/kralja, ki vplivajo na pravice rokiranja, učinki ujete trdnjave in obnova pri razveljavitvi.
+  - `src/utils/__tests__/chessUtils.test.ts`: testi za pomočnike in posodobitve pravic rokiranja, vključno s scenariji ujete trdnjave.
 
-### Changed
-- Extracted magic number 8 to a constant and used it across utilities and move validation.
-  - utils/chessUtils.ts: introduced BOARD_SIZE = 8; replaced hardcoded values in coordinate conversion, board setup, and validation; added helpers isValidDragData and sanitizeSquareInput.
-  - utils/moveValidation.ts: use BOARD_SIZE for rook and bishop range loops instead of hardcoded 8.
-  - hooks/useChessGame.ts: use BOARD_SIZE in MAKE_MOVE/UNDO_MOVE coordinate conversions; enhanced handlePieceDrop validation (format checks and from !== to) with error logging.
-- Undo and castling rights handling.
-  - types: extended Move to store prevHasMoved, prevCapturedHasMoved, and prevCastlingRights; GameState now tracks castlingRights.
-  - utils/chessUtils.ts: added createInitialCastlingRights, isKingMove, isRookMove, and updateCastlingRightsForMove(rights, piece, from, to, captured?) to disable castling when king/rook moves or a rook is captured on a1/h1/a8/h8.
-  - hooks/useChessGame.ts: fixed UNDO bug to restore hasMoved and captured piece state; records previous states in move history and updates/restores castling rights accordingly.
-- Check detection and legal-move filtering.
-  - utils/moveValidation.ts: added findKingPosition, isKingInCheck, and isMoveLegal; getValidMoves now filters out moves that leave own king in check.
-  - hooks/useChessGame.ts: after MAKE_MOVE, sets isInCheck if opponent king is in check; after UNDO_MOVE, recomputes isInCheck for the next current player.
+### Spremenjeno
+- Izvlečeno magično število 8 v konstanto in uporabljeno v pripomočkih ter validaciji potez.
+  - `utils/chessUtils.ts`: uveden `BOARD_SIZE = 8`; zamenjane trdo kodirane vrednosti pri pretvorbi koordinat, postavitvi plošče in validaciji; dodani pomočniki `isValidDragData` in `sanitizeSquareInput`.
+  - `utils/moveValidation.ts`: uporaba `BOARD_SIZE` za zanke dosega trdnjave in lovca namesto trdo kodirane 8.
+  - `hooks/useChessGame.ts`: uporaba `BOARD_SIZE` v pretvorbah koordinat za MAKE_MOVE/UNDO_MOVE; izboljšana validacija `handlePieceDrop` (preverbe formata in `from !== to`) z beleženjem napak.
+- Obravnava razveljavitve in pravic rokiranja.
+  - `types`: razširjen `Move` za shranjevanje `prevHasMoved`, `prevCapturedHasMoved` in `prevCastlingRights`; `GameState` zdaj sledi `castlingRights`.
+  - `utils/chessUtils.ts`: dodani `createInitialCastlingRights`, `isKingMove`, `isRookMove` in `updateCastlingRightsForMove(rights, piece, from, to, captured?)` za onemogočanje rokiranja, ko se kralj/trdnjava premakne ali je trdnjava ujeta na a1/h1/a8/h8.
+  - `hooks/useChessGame.ts`: odpravljen UNDO hrošč za obnovo `hasMoved` in stanja ujete figure; beleži prejšnja stanja v zgodovino potez in skladno posodobi/obnovi pravice rokiranja.
+- Zaznava šaha in filtriranje zakonitih potez.
+  - `utils/moveValidation.ts`: dodani `findKingPosition`, `isKingInCheck` in `isMoveLegal`; `getValidMoves` zdaj filtrira poteze, ki pustijo lastnega kralja v šahu.
+  - `hooks/useChessGame.ts`: po `MAKE_MOVE` nastavi `isInCheck`, če je nasprotnikov kralj v šahu; po `UNDO_MOVE` ponovno izračuna `isInCheck` za naslednjega trenutnega igralca.
 
