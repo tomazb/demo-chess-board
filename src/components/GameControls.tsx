@@ -6,7 +6,8 @@ const GameControls: React.FC<GameControlsProps> = ({
   gameState,
   onResetGame,
   onUndoMove,
-  onRedoMove
+  onRedoMove,
+  onToggleOrientation
 }) => {
   const winnerLabel = gameState.currentPlayer === 'white' ? '⚫ Black' : '⚪ White'
   const [showResetDialog, setShowResetDialog] = useState(false)
@@ -57,6 +58,12 @@ const GameControls: React.FC<GameControlsProps> = ({
 
       {/* Action Buttons */}
       <div className="mb-6 space-y-3">
+        <button
+          onClick={onToggleOrientation}
+          className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
+        >
+          🔁 Obrni ploščo
+        </button>
         <button
           onClick={openReset}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"

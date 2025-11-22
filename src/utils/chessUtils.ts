@@ -228,12 +228,15 @@ export const buildMoveRecord = (args: {
   isEnPassant?: boolean
   enPassantCaptureSquare?: Square
   promotion?: PieceType
+  prevHalfMoveClock?: number
+  prevPositionCounts?: Record<string, number>
 }): Move => {
   const {
     from, to, piece, captured,
     prevHasMoved, prevCapturedHasMoved,
     prevCastlingRights, prevEnPassantTarget,
-    isEnPassant, enPassantCaptureSquare, promotion
+    isEnPassant, enPassantCaptureSquare, promotion,
+    prevHalfMoveClock, prevPositionCounts
   } = args
   return {
     from,
@@ -249,6 +252,8 @@ export const buildMoveRecord = (args: {
     isEnPassant,
     enPassantCaptureSquare,
     promotion,
+    prevHalfMoveClock,
+    prevPositionCounts,
   }
 }
 
@@ -269,6 +274,31 @@ export const getPieceNotationSymbol = (type: PieceType): string => {
     default:
       return ''
   }
+}
+
+export const generatePositionKey = (
+  board: Board,
+  player: PieceColor,
+  rights: CastlingRights,
+  enPassant: Square | null
+): string => {
+  const rows: string[] = []
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    const cols: string[] = []
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      const p = board[r][c]
+      if (!p) { cols.push('.') } else {
+        const t = p.type
+        const code = t === 'king' ? 'k' : t === 'queen' ? 'q' : t === 'rook' ? 'r' : t === 'bishop' ? 'b' : t === 'knight' ? 'n' : 'p'
+        cols.push(p.color === 'white' ? code.toUpperCase() : code)
+      }
+    }
+    rows.push(cols.join(''))
+  }
+  const castling = `${rights.white.kingSide ? 'K' : ''}${rights.white.queenSide ? 'Q' : ''}${rights.black.kingSide ? 'k' : ''}${rights.black.queenSide ? 'q' : ''}` || '-'
+  const ep = enPassant || '-'
+  const turn = player === 'white' ? 'w' : 'b'
+  return `${rows.join('/')}:${turn}:${castling}:${ep}`
 }
 
 export const isCastlingMove = (piece: ChessPiece, from: Square, to: Square): 'O-O' | 'O-O-O' | null => {

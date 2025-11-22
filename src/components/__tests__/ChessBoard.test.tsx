@@ -22,6 +22,7 @@ function baseGameState(overrides: Partial<GameState> = {}): GameState {
       black: { kingSide: true, queenSide: true }
     },
     enPassantTarget: null,
+    orientation: 'whiteBottom',
     ...overrides,
   }
 }

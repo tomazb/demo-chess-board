@@ -348,30 +348,24 @@ export const isKingInCheck = (board: Board, color: PieceColor, kingSquare?: Squa
       const from = getSquareFromCoordinates(r, c)
       let attacks: Square[] = []
       switch (piece.type) {
-        case 'p':
         case 'pawn':
           attacks = getPawnAttacks(from, piece)
           break
-        case 'r':
         case 'rook':
           attacks = slidingMoves(board, from, piece.color, [[0, 1], [0, -1], [1, 0], [-1, 0]])
           break
-        case 'n':
         case 'knight':
           attacks = getKnightAttacks(board, from, piece.color)
           break
-        case 'b':
         case 'bishop':
           attacks = slidingMoves(board, from, piece.color, [[1, 1], [1, -1], [-1, 1], [-1, -1]])
           break
-        case 'q':
         case 'queen':
           attacks = slidingMoves(board, from, piece.color, [
             [0, 1], [0, -1], [1, 0], [-1, 0], // rook directions
             [1, 1], [1, -1], [-1, 1], [-1, -1] // bishop directions
           ])
           break
-        case 'k':
         case 'king':
           attacks = getKingAttacks(board, from, piece.color)
           break

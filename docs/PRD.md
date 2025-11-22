@@ -18,6 +18,9 @@
 - Zgodovina potez v SAN s razločevanjem, zajemi, rokiranje ter indikatorji `+`/`#` (`generateAlgebraicNotation`: `src/utils/chessUtils.ts:317`).
 - Undo/Redo z natančno obnovo stanj (`UNDO_MOVE`/`REDO_MOVE`: `src/hooks/useChessGame.ts:244`, `src/hooks/useChessGame.ts:299`).
 - Reset igre z potrditvenim dialogom (`ConfirmationDialog`: `src/components/ConfirmationDialog.tsx:5`; sprožitev v `GameControls`: `src/components/GameControls.tsx:14`).
+- Preklop orientacije plošče z gumbom: privzeto je beli spodaj; ob kliku se plošča obrne (črni spodaj), pravila in igralec na potezi ostaneta nespremenjena (`TOGGLE_ORIENTATION`: `src/hooks/useChessGame.ts:402`; `ChessBoard` orientacija: `src/components/ChessBoard.tsx:8`; gumb v `GameControls`: `src/components/GameControls.tsx:61`).
+- Remi pravila: trojna ponovitev pozicije (3× enak položaj) in 50 potez brez premika kmeta ali zajema. Sledenje prek `halfMoveClock` in `positionCounts` ter ključev pozicije (`generatePositionKey`: `src/utils/chessUtils.ts:...`).
+ - Po koncu igre (mat/pat/remi) se poteze onemogočijo; omogočeni ostanejo `Undo`, `Redo` in `Reset`.
 
 ## Uporabniške zgodbe
 - Kot igralec želim izbrati figuro in videti veljavne poteze, da lažje igram (`SELECT_SQUARE`: `src/hooks/useChessGame.ts:24`).
@@ -26,6 +29,7 @@
 - Kot igralec želim razveljaviti in ponovno izvesti poteze, da preučim potek igre (`UNDO_MOVE`/`REDO_MOVE`: `src/hooks/useChessGame.ts:244`, `src/hooks/useChessGame.ts:299`).
 - Kot igralec želim potrditi reset, da ne izgubim napredka nenamerno (`ConfirmationDialog` in `GameControls`: `src/components/ConfirmationDialog.tsx:5`, `src/components/GameControls.tsx:60`).
 - Kot igralec želim izvesti promocijo kmeta z jasno izbiro figure, da dokončam potezo (`PromotionDialog`: `src/components/PromotionDialog.tsx:15`).
+- Kot igralec želim obrniti ploščo z gumbom, da lahko gledam igro z vidika črnega ali belega, brez vpliva na potek igre (`GameControls` gumb: `src/components/GameControls.tsx:61`).
 
 ## Funkcionalne zahteve
 - Generiranje veljavnih potez za vse tipe figur, vključno s posebnimi pravili (`getValidMoves`: `src/utils/moveValidation.ts:14`).
@@ -50,3 +54,6 @@
 - Status igre se pravilno posodablja po vsaki potezi/razveljavitvi (`computeGameStatus`: `src/utils/moveValidation.ts:435`).
 - Dostopnost dialogov: tipkovnična navigacija, fokusna past, Escape preklic, obnovitev fokusa.
 - Zgodovina potez prikazuje veljavno SAN notacijo v UI (`GameControls`: `src/components/GameControls.tsx:83`).
+- Preklop orientacije: privzeto zgoraj-levo `a8`; po preklopu zgoraj-levo `h1`; `Current Player` ostane nespremenjen; test pokriva ta scenarij (`src/components/__tests__/BoardOrientation.test.tsx:1`).
+- Remi pravila: ob trojni ponovitvi ali 50 potezah brez kmetov/zajemov se `gameStatus` nastavi na `draw` in se prikaže v UI; test pokriva oba scenarija (`src/hooks/__tests__/useChessGame.draw.test.ts:1`).
+ - Blokada potez po koncu igre: poskusi premikov po zaključku so ignorirani; test potrdi nespremenjen `moveHistory` (`src/hooks/__tests__/useChessGame.end-lock.test.ts:1`).

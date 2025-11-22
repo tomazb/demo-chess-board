@@ -3,6 +3,7 @@ export type PieceType = 'pawn' | 'rook' | 'knight' | 'bishop' | 'queen' | 'king'
 export type PieceColor = 'white' | 'black';
 export type Square = string; // e.g., 'e4', 'a1'
 export type GameStatus = 'active' | 'check' | 'checkmate' | 'stalemate' | 'draw';
+export type BoardOrientation = 'whiteBottom' | 'blackBottom';
 
 // Piece interface
 export interface ChessPiece {
@@ -35,6 +36,9 @@ export interface Move {
   prevEnPassantTarget?: Square | null; // Previous en passant target for undo
   // Promotion tracking
   promotion?: PieceType;
+  // Draw tracking
+  prevHalfMoveClock?: number;
+  prevPositionCounts?: Record<string, number>;
 }
 
 // Board state (8x8 array)
@@ -59,6 +63,9 @@ export interface GameState {
   castlingRights: CastlingRights;
   enPassantTarget: Square | null; // Target square for en passant capture
   pendingPromotion: PendingPromotion | null;
+  orientation: BoardOrientation;
+  halfMoveClock?: number;
+  positionCounts?: Record<string, number>;
 }
 
 // Component props interfaces
@@ -82,6 +89,7 @@ export interface GameControlsProps {
   onResetGame: () => void;
   onUndoMove: () => void;
   onRedoMove: () => void;
+  onToggleOrientation?: () => void;
 }
 
 
@@ -111,4 +119,5 @@ export type GameAction =
   | { type: 'REDO_MOVE' }
   | { type: 'SET_VALID_MOVES'; moves: Square[] }
   | { type: 'UPDATE_GAME_STATUS'; status: GameStatus }
-  | { type: 'SET_EN_PASSANT_TARGET'; target: Square | null };
+  | { type: 'SET_EN_PASSANT_TARGET'; target: Square | null }
+  | { type: 'TOGGLE_ORIENTATION' };

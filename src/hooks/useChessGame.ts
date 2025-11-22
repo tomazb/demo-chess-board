@@ -1,6 +1,6 @@
 import { useReducer, useCallback } from 'react'
 import { GameState, GameAction, Square, Move, ChessPiece } from '../types/chess'
-import { createInitialBoard, getPieceAtSquare, isValidSquare, BOARD_SIZE, createInitialCastlingRights, updateCastlingRightsForMove, generateAlgebraicNotation, getCoordinatesFromSquare, computeEnPassantTarget, applyCastlingRookMove, undoCastlingRookMove, buildMoveRecord } from '../utils/chessUtils'
+import { createInitialBoard, getPieceAtSquare, isValidSquare, BOARD_SIZE, createInitialCastlingRights, updateCastlingRightsForMove, generateAlgebraicNotation, getCoordinatesFromSquare, computeEnPassantTarget, applyCastlingRookMove, undoCastlingRookMove, buildMoveRecord, generatePositionKey } from '../utils/chessUtils'
 import { getValidMoves, isEnPassantMove, computeGameStatus } from '../utils/moveValidation'
 
 // Initial game state
@@ -15,13 +15,24 @@ export const initialGameState: GameState = {
   isInCheck: false,
   castlingRights: createInitialCastlingRights(),
   enPassantTarget: null,
-  pendingPromotion: null
+  pendingPromotion: null,
+  orientation: 'whiteBottom'
+  ,
+  halfMoveClock: 0,
+  positionCounts: {}
 }
 
 // Game state reducer
 const gameReducer = (state: GameState, action: GameAction): GameState => {
   switch (action.type) {
     case 'SELECT_SQUARE': {
+      if (state.gameStatus !== 'active' && state.gameStatus !== 'check') {
+        return {
+          ...state,
+          selectedSquare: null,
+          validMoves: []
+        }
+      }
       const { square } = action
       const piece = getPieceAtSquare(state.board, square)
       
@@ -49,6 +60,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
     }
     
     case 'MAKE_MOVE': {
+      if (state.gameStatus !== 'active' && state.gameStatus !== 'check') {
+        return state
+      }
       const { from, to } = action
       const piece = getPieceAtSquare(state.board, from)
       
@@ -121,8 +135,17 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       
       const mover = state.currentPlayer
       const opponent = mover === 'white' ? 'black' : 'white'
-      const finalStatus = computeGameStatus(newBoard, opponent, nextCastlingRights, newEnPassantTarget)
-      const opponentInCheck = finalStatus === 'check' || finalStatus === 'checkmate'
+      const finalStatusComputed = computeGameStatus(newBoard, opponent, nextCastlingRights, newEnPassantTarget)
+      const opponentInCheck = finalStatusComputed === 'check' || finalStatusComputed === 'checkmate'
+
+      const didCapture = !!(enPassantCapturedPiece || capturedPiece)
+      const newHalfMoveClock = piece.type === 'pawn' || didCapture ? 0 : (state.halfMoveClock ?? 0) + 1
+      const key = generatePositionKey(newBoard, opponent, nextCastlingRights, newEnPassantTarget)
+      const newCounts = { ...(state.positionCounts ?? {}) }
+      newCounts[key] = (newCounts[key] ?? 0) + 1
+      const drawByRepetition = newCounts[key] >= 3
+      const drawByFifty = newHalfMoveClock >= 100
+      const finalStatus = drawByRepetition || drawByFifty ? 'draw' : finalStatusComputed
 
 // Create move record capturing previous states for undo with proper algebraic notation
       const move: Move = buildMoveRecord({
@@ -136,6 +159,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         prevEnPassantTarget: state.enPassantTarget,
         isEnPassant: isEnPassant || undefined,
         enPassantCaptureSquare: enPassantCaptureSquare,
+        prevHalfMoveClock: state.halfMoveClock,
+        prevPositionCounts: state.positionCounts,
       })
       const notation = generateAlgebraicNotation(state.board, move, finalStatus)
       move.notation = notation
@@ -151,7 +176,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         isInCheck: opponentInCheck,
         gameStatus: finalStatus,
         castlingRights: nextCastlingRights,
-        enPassantTarget: newEnPassantTarget
+        enPassantTarget: newEnPassantTarget,
+        halfMoveClock: newHalfMoveClock,
+        positionCounts: newCounts
       }
     }
     
@@ -194,9 +221,15 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 
       const mover = state.currentPlayer
       const opponent = mover === 'white' ? 'black' : 'white'
-      const computedStatus = computeGameStatus(newBoard, opponent, nextCastlingRights, state.enPassantTarget)
-      const opponentInCheck = computedStatus === 'check' || computedStatus === 'checkmate'
-      const finalStatus = computedStatus
+      const computedStatusBase = computeGameStatus(newBoard, opponent, nextCastlingRights, state.enPassantTarget)
+      const opponentInCheck = computedStatusBase === 'check' || computedStatusBase === 'checkmate'
+      const newHalfMoveClock = 0
+      const key = generatePositionKey(newBoard, opponent, nextCastlingRights, state.enPassantTarget)
+      const newCounts = { ...(state.positionCounts ?? {}) }
+      newCounts[key] = (newCounts[key] ?? 0) + 1
+      const drawByRepetition = newCounts[key] >= 3
+      const drawByFifty = newHalfMoveClock >= 100
+      const finalStatus = drawByRepetition || drawByFifty ? 'draw' : computedStatusBase
 
       const move: Move = buildMoveRecord({
         from: pp.from,
@@ -207,7 +240,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         prevCapturedHasMoved: capturedPrevHasMoved,
         prevCastlingRights: state.castlingRights,
         prevEnPassantTarget: state.enPassantTarget,
-        promotion: promoPieceType
+        promotion: promoPieceType,
+        prevHalfMoveClock: state.halfMoveClock,
+        prevPositionCounts: state.positionCounts,
       })
       const notation = generateAlgebraicNotation(state.board, move, finalStatus)
       move.notation = notation
@@ -224,6 +259,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         gameStatus: finalStatus,
         castlingRights: nextCastlingRights,
         enPassantTarget: null,
+        halfMoveClock: newHalfMoveClock,
+        positionCounts: newCounts,
         pendingPromotion: null,
       }
     }
@@ -240,6 +277,11 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 
     case 'RESET_GAME':
       return initialGameState
+    
+    case 'TOGGLE_ORIENTATION': {
+      const next = state.orientation === 'whiteBottom' ? 'blackBottom' : 'whiteBottom'
+      return { ...state, orientation: next }
+    }
     
     case 'UNDO_MOVE': {
       if (state.moveHistory.length === 0) return state
@@ -278,7 +320,12 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       }
       
       const nextCurrent = state.currentPlayer === 'white' ? 'black' : 'white'
-      const finalStatus = computeGameStatus(newBoard, nextCurrent, lastMove.prevCastlingRights, lastMove.prevEnPassantTarget || null)
+      const finalStatusBase = computeGameStatus(newBoard, nextCurrent, lastMove.prevCastlingRights, lastMove.prevEnPassantTarget || null)
+      const key = generatePositionKey(newBoard, nextCurrent, lastMove.prevCastlingRights, lastMove.prevEnPassantTarget || null)
+      const counts = lastMove.prevPositionCounts ?? {}
+      const drawByRepetition = (counts[key] ?? 0) >= 3
+      const drawByFifty = (lastMove.prevHalfMoveClock ?? 0) >= 100
+      const finalStatus = drawByRepetition || drawByFifty ? 'draw' : finalStatusBase
       const nextInCheck = finalStatus === 'check' || finalStatus === 'checkmate'
 
       return {
@@ -292,7 +339,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         isInCheck: nextInCheck,
         gameStatus: finalStatus,
         castlingRights: lastMove.prevCastlingRights,
-        enPassantTarget: lastMove.prevEnPassantTarget || null
+        enPassantTarget: lastMove.prevEnPassantTarget || null,
+        halfMoveClock: lastMove.prevHalfMoveClock ?? 0,
+        positionCounts: lastMove.prevPositionCounts ?? {}
       }
     }
     
@@ -337,7 +386,15 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       
       const mover = state.currentPlayer
       const opponent = mover === 'white' ? 'black' : 'white'
-      const finalStatus = computeGameStatus(newBoard, opponent, state.castlingRights, redoEnPassantTarget)
+      const finalStatusBase = computeGameStatus(newBoard, opponent, state.castlingRights, redoEnPassantTarget)
+      const didCapture = !!moveToRedo.captured
+      const newHalfMoveClock = moveToRedo.piece.type === 'pawn' || moveToRedo.promotion || didCapture ? 0 : (state.halfMoveClock ?? 0) + 1
+      const key = generatePositionKey(newBoard, opponent, state.castlingRights, redoEnPassantTarget)
+      const newCounts = { ...(state.positionCounts ?? {}) }
+      newCounts[key] = (newCounts[key] ?? 0) + 1
+      const drawByRepetition = newCounts[key] >= 3
+      const drawByFifty = newHalfMoveClock >= 100
+      const finalStatus = drawByRepetition || drawByFifty ? 'draw' : finalStatusBase
       const opponentInCheck = finalStatus === 'check' || finalStatus === 'checkmate'
       
       // Update castling rights based on the redone move
@@ -360,7 +417,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         isInCheck: opponentInCheck,
         gameStatus: finalStatus,
         castlingRights: nextCastlingRights,
-        enPassantTarget: redoEnPassantTarget
+        enPassantTarget: redoEnPassantTarget,
+        halfMoveClock: newHalfMoveClock,
+        positionCounts: newCounts
       }
     }
     
@@ -422,6 +481,10 @@ export const useChessGame = (initialState: GameState = initialGameState) => {
     dispatch({ type: 'CANCEL_PROMOTION' })
   }, [])
   
+  const toggleOrientation = useCallback(() => {
+    dispatch({ type: 'TOGGLE_ORIENTATION' })
+  }, [])
+  
   return {
     gameState,
     handleSquareClick,
@@ -431,5 +494,6 @@ export const useChessGame = (initialState: GameState = initialGameState) => {
     redoMove,
     completePromotion,
     cancelPromotion,
+    toggleOrientation,
   }
 }

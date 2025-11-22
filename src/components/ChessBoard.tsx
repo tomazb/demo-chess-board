@@ -2,15 +2,16 @@ import React from 'react'
 import ChessSquare from './ChessSquare'
 import ErrorBoundary from './ErrorBoundary'
 import { ChessBoardProps } from '../types/chess'
-import { getSquareColor } from '../utils/chessUtils'
+import { getSquareColor, getCoordinatesFromSquare } from '../utils/chessUtils'
 
 const ChessBoard: React.FC<ChessBoardProps> = ({
   gameState,
   onSquareClick,
   onPieceDrop
 }) => {
-  const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
-  const ranks = [8, 7, 6, 5, 4, 3, 2, 1]
+  const isWhiteBottom = gameState.orientation === 'whiteBottom'
+  const files = isWhiteBottom ? ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] : ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a']
+  const ranks = isWhiteBottom ? [8, 7, 6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6, 7, 8]
 
   return (
     <div className="inline-block bg-gray-800 p-4 rounded-lg shadow-2xl">
@@ -35,7 +36,8 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
               {ranks.map(rank =>
                 files.map(file => {
                   const square = `${file}${rank}`
-                  const piece = gameState.board[8 - rank][files.indexOf(file)]
+                  const [row, col] = getCoordinatesFromSquare(square)
+                  const piece = gameState.board[row][col]
                   const isSelected = gameState.selectedSquare === square
                   const isValidMove = gameState.validMoves.includes(square)
                   const squareColor = getSquareColor(file, rank)

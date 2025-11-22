@@ -17,6 +17,9 @@
 - `ChessPiece`: `type`, `color`, `hasMoved` (`src/types/chess.ts:8`).
 - `GameState`: trenutni igralec, zgodovina potez, redo, status igre, izbrano polje, veljavne poteze, šah indikator, pravice rokiranja, en passant cilj, promocija (`src/types/chess.ts:50`).
 - `Move`: polno beleženje stanj za Undo/Redo (vključno z prejšnjimi pravicami rokiranja, en passant) (`src/types/chess.ts:20`).
+- `orientation`: orientacija plošče (`whiteBottom` | `blackBottom`) za 180° rotacijo prikaza (`src/types/chess.ts:50`).
+- `halfMoveClock`: števec polpotez brez premika kmeta ali zajema; ob 100 polpotezah remi.
+- `positionCounts`: števec ponovitev pozicij, ključ generiran z `generatePositionKey`.
 
 ## Upravljanje stanja
 - Centralni reducer `gameReducer` upravlja selekcijo, poteze, promocijo, reset, undo/redo (`src/hooks/useChessGame.ts:21`).
@@ -25,6 +28,9 @@
   - Uporabi klonirano tablo, izvede zajem (vklj. en passant), posodobi `hasMoved`, pravice rokiranja, en passant cilj (`src/hooks/useChessGame.ts:98`, `src/utils/chessUtils.ts:131`).
   - Izračuna status igre (`computeGameStatus`) in generira SAN (`generateAlgebraicNotation`) (`src/hooks/useChessGame.ts:124`, `src/utils/chessUtils.ts:317`).
 - Undo/Redo z dosledno obnovo vseh odvisnih stanj (rokiranje trdnjave, en passant, promocije) (`src/hooks/useChessGame.ts:253`, `src/hooks/useChessGame.ts:320`).
+- `TOGGLE_ORIENTATION`: preklopi orientacijo brez vpliva na logiko igre (`src/hooks/useChessGame.ts:397`).
+- Remi logika v reducerju po vsaki potezi: izračun `halfMoveClock`, posodobitev `positionCounts`, trojna ponovitev in 50-potezno pravilo nastavita `gameStatus='draw'` (`src/hooks/useChessGame.ts:124`).
+ - Blokada potez po koncu: guardi v `SELECT_SQUARE` in `MAKE_MOVE` preprečijo nadaljnje poteze, ko `gameStatus` ni `active` ali `check` (`src/hooks/useChessGame.ts:28`, `src/hooks/useChessGame.ts:55`).
 
 ## Logika potez
 - Generator veljavnih potez `getValidMoves` delegira na posamezne tipe figur in filtrira poteze, ki puščajo kralja v šahu (`src/utils/moveValidation.ts:13`, `src/utils/moveValidation.ts:45`).
@@ -43,6 +49,7 @@
 - `ChessSquare`: interakcije (klik, tipkovnica, DnD, touch), validacija vnosa (`src/components/ChessSquare.tsx:31`).
 - `ChessPiece`: DnD vir, sanitizacija, unicode simbol (`src/components/ChessPiece.tsx:11`).
 - `GameControls`: status igre, gumbi Reset/Undo/Redo, prikaz zgodovine potez (`src/components/GameControls.tsx:22`).
+- Gumb za preklop orientacije (`src/components/GameControls.tsx:61`) sproži `TOGGLE_ORIENTATION`; `ChessBoard` izriše datoteke/range v odvisnosti od orientacije (`src/components/ChessBoard.tsx:8`).
 - `PromotionDialog` in `ConfirmationDialog`: dostopna dialoga, fokusna past, tipkovnična navigacija (`src/components/PromotionDialog.tsx:43`, `src/components/ConfirmationDialog.tsx:50`).
 
 ## Dostopnost (A11y)
@@ -53,6 +60,8 @@
 - Enotski testi utilov (pravice rokiranja, validacija potez, notacija) (`src/utils/__tests__`).
 - Integracijski testi hook-a (`useChessGame`) za rokiranje, promocijo, en passant, undo/redo (`src/hooks/__tests__`).
 - UI in A11y testi komponent (ChessBoard, GameControls, dialogs) (`src/components/__tests__`).
+- Testi remija: `useChessGame.draw.test.ts` pokrivajo trojno ponovitev pozicije in 50 potez brez kmetov/zajemov (`src/hooks/__tests__/useChessGame.draw.test.ts`).
+ - Test blokade: `useChessGame.end-lock.test.ts` potrdi, da se po zaključku igre nadaljnji premiki ignorirajo.
 - Pragovi pokritosti nastavljeni v `vitest.config.ts`.
 
 ## Razširljivost in vzdrževanje
