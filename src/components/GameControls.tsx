@@ -7,7 +7,8 @@ const GameControls: React.FC<GameControlsProps> = ({
   onResetGame,
   onUndoMove,
   onRedoMove,
-  onToggleOrientation
+  onToggleOrientation,
+  onToggleMode,
 }) => {
   const winnerLabel = gameState.currentPlayer === 'white' ? '⚫ Black' : '⚪ White'
   const [showResetDialog, setShowResetDialog] = useState(false)
@@ -58,6 +59,16 @@ const GameControls: React.FC<GameControlsProps> = ({
 
       {/* Action Buttons */}
       <div className="mb-6 space-y-3">
+        <div className="flex gap-2 mb-3">
+          <span className="text-gray-600">Način igre:</span>
+          <span className="font-semibold">{gameState.mode === 'pvai' ? 'Človek vs AI' : 'Človek vs Človek'}</span>
+        </div>
+        <button
+          onClick={onToggleMode}
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
+        >
+          🤖 Preklopi način igre
+        </button>
         <button
           onClick={onToggleOrientation}
           className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"

@@ -20,6 +20,7 @@
 - Reset igre z potrditvenim dialogom (`ConfirmationDialog`: `src/components/ConfirmationDialog.tsx:5`; sprožitev v `GameControls`: `src/components/GameControls.tsx:14`).
 - Preklop orientacije plošče z gumbom: privzeto je beli spodaj; ob kliku se plošča obrne (črni spodaj), pravila in igralec na potezi ostaneta nespremenjena (`TOGGLE_ORIENTATION`: `src/hooks/useChessGame.ts:402`; `ChessBoard` orientacija: `src/components/ChessBoard.tsx:8`; gumb v `GameControls`: `src/components/GameControls.tsx:61`).
 - Remi pravila: trojna ponovitev pozicije (3× enak položaj) in 50 potez brez premika kmeta ali zajema. Sledenje prek `halfMoveClock` in `positionCounts` ter ključev pozicije (`generatePositionKey`: `src/utils/chessUtils.ts:...`).
+ - Način "Človek vs AI": lokalni AI srednje moči brez Stockfisha; nastavitve globine in časovne omejitve poteze; preklop načina v `GameControls`.
  - Po koncu igre (mat/pat/remi) se poteze onemogočijo; omogočeni ostanejo `Undo`, `Redo` in `Reset`.
 
 ## Uporabniške zgodbe
@@ -56,4 +57,5 @@
 - Zgodovina potez prikazuje veljavno SAN notacijo v UI (`GameControls`: `src/components/GameControls.tsx:83`).
 - Preklop orientacije: privzeto zgoraj-levo `a8`; po preklopu zgoraj-levo `h1`; `Current Player` ostane nespremenjen; test pokriva ta scenarij (`src/components/__tests__/BoardOrientation.test.tsx:1`).
 - Remi pravila: ob trojni ponovitvi ali 50 potezah brez kmetov/zajemov se `gameStatus` nastavi na `draw` in se prikaže v UI; test pokriva oba scenarija (`src/hooks/__tests__/useChessGame.draw.test.ts:1`).
- - Blokada potez po koncu igre: poskusi premikov po zaključku so ignorirani; test potrdi nespremenjen `moveHistory` (`src/hooks/__tests__/useChessGame.end-lock.test.ts:1`).
+- Blokada potez po koncu igre: poskusi premikov po zaključku so ignorirani; test potrdi nespremenjen `moveHistory` (`src/hooks/__tests__/useChessGame.end-lock.test.ts:1`).
+ - AI: ob vklopu načina `Človek vs AI` in potezi AI barve vrne legalno potezo v ≤ 1 s (pri privzeti globini) in jo odigra; UI ostane odziven.

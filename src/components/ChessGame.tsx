@@ -21,6 +21,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ initialState }) => {
     completePromotion,
     cancelPromotion,
     toggleOrientation,
+    toggleMode,
   } = useChessGame(initialState)
 
   return (
@@ -39,6 +40,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ initialState }) => {
           onUndoMove={undoMove}
           onRedoMove={redoMove}
           onToggleOrientation={toggleOrientation}
+          onToggleMode={toggleMode}
         />
       </div>
 

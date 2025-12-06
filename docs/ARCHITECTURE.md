@@ -20,6 +20,8 @@
 - `orientation`: orientacija plošče (`whiteBottom` | `blackBottom`) za 180° rotacijo prikaza (`src/types/chess.ts:50`).
 - `halfMoveClock`: števec polpotez brez premika kmeta ali zajema; ob 100 polpotezah remi.
 - `positionCounts`: števec ponovitev pozicij, ključ generiran z `generatePositionKey`.
+ - `mode`: način igre (`pvp` | `pvai`).
+ - `aiSettings`: nastavitve AI (barva, globina, čas poteze, auto analiza).
 
 ## Upravljanje stanja
 - Centralni reducer `gameReducer` upravlja selekcijo, poteze, promocijo, reset, undo/redo (`src/hooks/useChessGame.ts:21`).
@@ -31,6 +33,7 @@
 - `TOGGLE_ORIENTATION`: preklopi orientacijo brez vpliva na logiko igre (`src/hooks/useChessGame.ts:397`).
 - Remi logika v reducerju po vsaki potezi: izračun `halfMoveClock`, posodobitev `positionCounts`, trojna ponovitev in 50-potezno pravilo nastavita `gameStatus='draw'` (`src/hooks/useChessGame.ts:124`).
  - Blokada potez po koncu: guardi v `SELECT_SQUARE` in `MAKE_MOVE` preprečijo nadaljnje poteze, ko `gameStatus` ni `active` ali `check` (`src/hooks/useChessGame.ts:28`, `src/hooks/useChessGame.ts:55`).
+ - AI integracija: asinhroni klic `computeBestMove` prek `useEffect` ko je na potezi AI; akcije `TOGGLE_MODE` in `SET_AI_SETTINGS`.
 
 ## Logika potez
 - Generator veljavnih potez `getValidMoves` delegira na posamezne tipe figur in filtrira poteze, ki puščajo kralja v šahu (`src/utils/moveValidation.ts:13`, `src/utils/moveValidation.ts:45`).
@@ -68,6 +71,11 @@
 - Enotni SRP/DRY pomočniki (`buildMoveRecord`, `slidingMoves`) zmanjšujejo ponavljanje (`src/utils/chessUtils.ts:218`, `src/utils/moveValidation.ts:115`).
 - Tipi v `src/types` omogočajo varnost in jasnost pogodbe med plastmi.
 - Ločitev UI/poslovne logike preko hook-a olajša refaktoriranje in testiranje.
+
+## Logika AI (brez Stockfisha)
+- `src/engine/evaluation.ts`: ocena položaja (material, PST), rezultat v centipawn.
+- `src/engine/search.ts`: minimax z alfa–beta, generiranje legalnih potez prek obstoječega `getValidMoves`, aplikacija poteze na kopiji plošče.
+- `src/engine/ai.ts`: `computeBestMove(state, depth, moveTimeMs)` z iterativnim poglabljanjem.
 
 ## Omejitve trenutne zasnove
 - Brez mrežnega igranja ali AI; lokalna igra dveh igralcev.

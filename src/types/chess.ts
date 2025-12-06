@@ -4,6 +4,7 @@ export type PieceColor = 'white' | 'black';
 export type Square = string; // e.g., 'e4', 'a1'
 export type GameStatus = 'active' | 'check' | 'checkmate' | 'stalemate' | 'draw';
 export type BoardOrientation = 'whiteBottom' | 'blackBottom';
+export type GameMode = 'pvp' | 'pvai';
 
 // Piece interface
 export interface ChessPiece {
@@ -66,6 +67,13 @@ export interface GameState {
   orientation: BoardOrientation;
   halfMoveClock?: number;
   positionCounts?: Record<string, number>;
+  mode?: GameMode;
+  aiSettings?: {
+    aiPlays: PieceColor;
+    depth?: number;
+    moveTimeMs?: number;
+    autoAnalyze?: boolean;
+  };
 }
 
 // Component props interfaces
@@ -90,6 +98,7 @@ export interface GameControlsProps {
   onUndoMove: () => void;
   onRedoMove: () => void;
   onToggleOrientation?: () => void;
+  onToggleMode?: () => void;
 }
 
 
@@ -120,4 +129,6 @@ export type GameAction =
   | { type: 'SET_VALID_MOVES'; moves: Square[] }
   | { type: 'UPDATE_GAME_STATUS'; status: GameStatus }
   | { type: 'SET_EN_PASSANT_TARGET'; target: Square | null }
-  | { type: 'TOGGLE_ORIENTATION' };
+  | { type: 'TOGGLE_ORIENTATION' }
+  | { type: 'TOGGLE_MODE' }
+  | { type: 'SET_AI_SETTINGS'; settings: Partial<NonNullable<GameState['aiSettings']>> };

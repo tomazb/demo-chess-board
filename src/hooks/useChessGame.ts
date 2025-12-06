@@ -1,7 +1,8 @@
-import { useReducer, useCallback } from 'react'
+import { useReducer, useCallback, useEffect, useRef } from 'react'
 import { GameState, GameAction, Square, Move, ChessPiece } from '../types/chess'
 import { createInitialBoard, getPieceAtSquare, isValidSquare, BOARD_SIZE, createInitialCastlingRights, updateCastlingRightsForMove, generateAlgebraicNotation, getCoordinatesFromSquare, computeEnPassantTarget, applyCastlingRookMove, undoCastlingRookMove, buildMoveRecord, generatePositionKey } from '../utils/chessUtils'
 import { getValidMoves, isEnPassantMove, computeGameStatus } from '../utils/moveValidation'
+import { computeBestMove } from '../engine/ai'
 
 // Initial game state
 export const initialGameState: GameState = {
@@ -19,7 +20,9 @@ export const initialGameState: GameState = {
   orientation: 'whiteBottom'
   ,
   halfMoveClock: 0,
-  positionCounts: {}
+  positionCounts: {},
+  mode: 'pvp',
+  aiSettings: { aiPlays: 'black', depth: 3, moveTimeMs: 1500, autoAnalyze: false }
 }
 
 // Game state reducer
@@ -282,6 +285,15 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const next = state.orientation === 'whiteBottom' ? 'blackBottom' : 'whiteBottom'
       return { ...state, orientation: next }
     }
+    case 'TOGGLE_MODE': {
+      const next = (state.mode ?? 'pvp') === 'pvai' ? 'pvp' : 'pvai'
+      return { ...state, mode: next }
+    }
+    case 'SET_AI_SETTINGS': {
+      return { ...state, aiSettings: { ...(state.aiSettings ?? { aiPlays: 'black' }), ...action.settings } }
+    }
+
+    
     
     case 'UNDO_MOVE': {
       if (state.moveHistory.length === 0) return state
@@ -443,6 +455,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 // Custom hook for chess game logic
 export const useChessGame = (initialState: GameState = initialGameState) => {
   const [gameState, dispatch] = useReducer(gameReducer, initialState)
+  const aiBusyRef = useRef(false)
   
   const handleSquareClick = useCallback((square: Square) => {
     if (!isValidSquare(square)) return
@@ -484,6 +497,31 @@ export const useChessGame = (initialState: GameState = initialGameState) => {
   const toggleOrientation = useCallback(() => {
     dispatch({ type: 'TOGGLE_ORIENTATION' })
   }, [])
+
+  const toggleMode = useCallback(() => {
+    dispatch({ type: 'TOGGLE_MODE' })
+  }, [])
+
+  const setAiSettings = useCallback((settings: Partial<NonNullable<GameState['aiSettings']>>) => {
+    dispatch({ type: 'SET_AI_SETTINGS', settings })
+  }, [])
+  
+  const requestAiMove = useCallback(async () => {
+    if (gameState.mode !== 'pvai') return
+    if (gameState.gameStatus !== 'active' && gameState.gameStatus !== 'check') return
+    if (gameState.currentPlayer !== (gameState.aiSettings?.aiPlays ?? 'black')) return
+    if (aiBusyRef.current) return
+    aiBusyRef.current = true
+    const best = await computeBestMove(gameState, gameState.aiSettings?.depth ?? 3, gameState.aiSettings?.moveTimeMs ?? 1000)
+    if (!best) { aiBusyRef.current = false; return }
+    dispatch({ type: 'SELECT_SQUARE', square: best.from })
+    dispatch({ type: 'MAKE_MOVE', from: best.from, to: best.to })
+    aiBusyRef.current = false
+  }, [gameState])
+  
+  useEffect(() => {
+    requestAiMove()
+  }, [requestAiMove])
   
   return {
     gameState,
@@ -495,5 +533,8 @@ export const useChessGame = (initialState: GameState = initialGameState) => {
     completePromotion,
     cancelPromotion,
     toggleOrientation,
+    toggleMode,
+    setAiSettings,
+    requestAiMove,
   }
 }
