@@ -22,7 +22,7 @@ export const initialGameState: GameState = {
   halfMoveClock: 0,
   positionCounts: {},
   mode: 'pvp',
-  aiSettings: { aiPlays: 'black', depth: 3, moveTimeMs: 1500, autoAnalyze: false }
+  aiSettings: { aiPlays: 'black', depth: 3, moveTimeMs: 2000, autoAnalyze: false }
 }
 
 // Game state reducer

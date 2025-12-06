@@ -12,6 +12,7 @@ interface ChessSquareProps {
   onSquareClick: (square: Square) => void
   onPieceDrop: (from: Square, to: Square) => void
   currentSelected: Square | null
+  isLastMove?: boolean
 }
 
 const ChessSquare: React.FC<ChessSquareProps> = ({
@@ -22,7 +23,8 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
   squareColor,
   onSquareClick,
   onPieceDrop,
-  currentSelected
+  currentSelected,
+  isLastMove
 }) => {
   const handleClick = () => {
     onSquareClick(square)
@@ -80,6 +82,7 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
   const selectedClasses = isSelected ? 'chess-square-selected' : ''
   const validMoveClasses = isValidMove ? 'chess-square-valid-move' : ''
   const hoverClasses = 'hover:brightness-110'
+  const lastMoveClasses = isLastMove ? 'ring-2 ring-yellow-400' : ''
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -102,7 +105,7 @@ const ChessSquare: React.FC<ChessSquareProps> = ({
 
   return (
     <div
-      className={`${baseClasses} ${colorClasses} ${selectedClasses} ${validMoveClasses} ${hoverClasses}`}
+      className={`${baseClasses} ${colorClasses} ${selectedClasses} ${validMoveClasses} ${hoverClasses} ${lastMoveClasses}`}
       onClick={handleClick}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
