@@ -2,6 +2,7 @@ import { Board, PieceColor, CastlingRights, Square, ChessPiece } from '../types/
 import { getValidMoves } from '../utils/moveValidation'
 import { evaluate } from './evaluation'
 import { updateCastlingRightsForMove, computeEnPassantTarget, BOARD_SIZE } from '../utils/chessUtils'
+import { zobristHash, TTEntry } from './zobrist'
 
 
 function cloneBoard(board: Board): Board {
@@ -37,20 +38,33 @@ function genMoves(board: Board, color: PieceColor, rights: CastlingRights, enPas
   return moves
 }
 
-export function search(board: Board, turn: PieceColor, rights: CastlingRights, enPassant: Square | null, depth: number, alpha: number, beta: number): { score: number, move?: { from: Square, to: Square } } {
+export function search(board: Board, turn: PieceColor, rights: CastlingRights, enPassant: Square | null, depth: number, alpha: number, beta: number, tt?: Map<bigint, TTEntry>): { score: number, move?: { from: Square, to: Square } } {
   if (depth === 0) return { score: evaluate(board, turn) }
+  const key = zobristHash(board, turn, rights, enPassant)
+  if (tt && tt.has(key)) {
+    const e = tt.get(key)!
+    if (e.depth >= depth) return { score: e.score, move: e.move }
+  }
   const moves = genMoves(board, turn, rights, enPassant)
+  moves.sort((a, b) => {
+    const ta = board[BOARD_SIZE - parseInt(a.to[1])][a.to.charCodeAt(0) - 97]
+    const tb = board[BOARD_SIZE - parseInt(b.to[1])][b.to.charCodeAt(0) - 97]
+    const va = ta ? 1 : 0
+    const vb = tb ? 1 : 0
+    return vb - va
+  })
   let best: { score: number, move?: { from: Square, to: Square } } = { score: -Infinity }
   for (const m of moves) {
     const applied = apply(board, m.from, m.to)
     const nextRights = updateCastlingRightsForMove(rights, applied.moved, m.from, m.to, applied.captured || undefined)
     const nextEP = applied.moved.type === 'pawn' ? computeEnPassantTarget(BOARD_SIZE - parseInt(m.from[1]), BOARD_SIZE - parseInt(m.to[1]), m.from.charCodeAt(0) - 97) : null
     const nextTurn = turn === 'white' ? 'black' : 'white'
-    const res = search(applied.board, nextTurn, nextRights, nextEP, depth - 1, -beta, -alpha)
+    const res = search(applied.board, nextTurn, nextRights, nextEP, depth - 1, -beta, -alpha, tt)
     const score = -res.score
     if (score > best.score) best = { score, move: m }
     if (score > alpha) alpha = score
     if (alpha >= beta) break
   }
+  if (tt) tt.set(key, { depth, score: best.score, move: best.move })
   return best
 }
