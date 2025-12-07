@@ -1,9 +1,12 @@
 import { GameState, Square } from '../types/chess'
 import { search } from './search'
 import { TTEntry } from './zobrist'
+import { getBookMove } from './openingBook'
 
 export async function computeBestMove(state: GameState, depth = 3, moveTimeMs = 1000): Promise<{ from: Square, to: Square } | null> {
   const start = Date.now()
+  const book = getBookMove(state)
+  if (book) return book
   let best: { from: Square, to: Square } | null = null
   let d = 1
   const tt: Map<bigint, TTEntry> = new Map()
