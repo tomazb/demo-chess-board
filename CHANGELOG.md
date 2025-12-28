@@ -5,7 +5,7 @@ Vse pomembne spremembe tega projekta so dokumentirane v tej datoteki.
 ## Neizdano
 
 ### Vzdrževanje
-- Posodobitve AI, dokumentacije, CI in otvoritvene knjige; dodani testi.
+- Posodobljen CHANGELOG za zadnje spremembe
 
 
 ## 2025-09-02 - Popravek napake pri zaznavi mat-a
