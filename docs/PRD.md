@@ -22,7 +22,8 @@
 - Remi pravila: trojna ponovitev pozicije (3× enak položaj) in 50 potez brez premika kmeta ali zajema. Sledenje prek `halfMoveClock` in `positionCounts` ter ključev pozicije (`generatePositionKey`: `src/utils/chessUtils.ts:...`).
 - Način "Človek vs AI": lokalni AI srednje moči brez Stockfisha; iterativno poglabljanje z deljeno transpozicijsko tabelo (Zobrist hash), osnovni premet potez (zajemi najprej); nastavitve globine in časovne omejitve poteze; preklop načina v `GameControls`.
 - Eval heuristike: kmetovska struktura (dvojni/izolirani/prekleti kmeti), bonus lovcev v paru, roke na odprtih/semi-odprtih datotekah, mobilnost in osnovna varnost kralja.
- - Opening book: majhen nabor otvoritev (npr. 1.e4 e5 2.Nf3 Nc6, 1.d4 d5 2.c4 e6); AI najprej preveri book in odigra potezo iz knjige, nato šele uporabi iskalnik.
+- Opening book: majhen nabor otvoritev (npr. 1.e4 e5 2.Nf3 Nc6, 1.d4 d5 2.c4 e6); AI najprej preveri book in odigra potezo iz knjige, nato šele uporabi iskalnik.
+ - PGN Opening book: uvoz večjega kuriranega PGN v JSON (`public/opening-book.json`) in izbor potez glede na slog (agresiven/pozicijski/uravnotežen) preko `aiSettings.style`.
  - Po koncu igre (mat/pat/remi) se poteze onemogočijo; omogočeni ostanejo `Undo`, `Redo` in `Reset`.
 
 ## Uporabniške zgodbe
@@ -62,4 +63,5 @@
 - Blokada potez po koncu igre: poskusi premikov po zaključku so ignorirani; test potrdi nespremenjen `moveHistory` (`src/hooks/__tests__/useChessGame.end-lock.test.ts:1`).
 - AI: ob vklopu načina `Človek vs AI` in potezi AI barve vrne legalno potezo v ≤ 1–2 s (glede na časovno omejitev) in jo odigra; UI ostane odziven.
 - Eval: heuristike dvignejo oceno v smereh boljše strukture in aktivnosti; enotski testi potrjujejo učinke heuristik.
- - Opening book: enotski test potrdi, da po `e4` AI predlaga `e5` in po `Nf3` v tej liniji `Nc6`.
+- Opening book: enotski test potrdi, da po `e4` AI predlaga `e5` in po `Nf3` v tej liniji `Nc6`.
+ - Slog: test potrdi `aggressive` → `c5` po `e4` ter `positional` → `e6` ali `c6` po `e4`.

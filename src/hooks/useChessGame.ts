@@ -22,7 +22,8 @@ export const initialGameState: GameState = {
   halfMoveClock: 0,
   positionCounts: {},
   mode: 'pvp',
-  aiSettings: { aiPlays: 'black', depth: 3, moveTimeMs: 1200, autoAnalyze: false }
+  aiSettings: { aiPlays: 'black', depth: 3, moveTimeMs: 1200, autoAnalyze: false, style: 'balanced' },
+  aiThinking: false
 }
 
 // Game state reducer
@@ -446,6 +447,11 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         ...state,
         gameStatus: action.status
       }
+    case 'SET_AI_THINKING':
+      return {
+        ...state,
+        aiThinking: action.value
+      }
     
     default:
       return state
@@ -512,11 +518,17 @@ export const useChessGame = (initialState: GameState = initialGameState) => {
     if (gameState.currentPlayer !== (gameState.aiSettings?.aiPlays ?? 'black')) return
     if (aiBusyRef.current) return
     aiBusyRef.current = true
-    const best = await computeBestMove(gameState, gameState.aiSettings?.depth ?? 3, gameState.aiSettings?.moveTimeMs ?? 1000)
-    if (!best) { aiBusyRef.current = false; return }
-    dispatch({ type: 'SELECT_SQUARE', square: best.from })
-    dispatch({ type: 'MAKE_MOVE', from: best.from, to: best.to })
-    aiBusyRef.current = false
+    dispatch({ type: 'SET_AI_THINKING', value: true })
+    try {
+      const best = await computeBestMove(gameState, gameState.aiSettings?.depth ?? 3, gameState.aiSettings?.moveTimeMs ?? 1000)
+      if (best) {
+        dispatch({ type: 'SELECT_SQUARE', square: best.from })
+        dispatch({ type: 'MAKE_MOVE', from: best.from, to: best.to })
+      }
+    } finally {
+      dispatch({ type: 'SET_AI_THINKING', value: false })
+      aiBusyRef.current = false
+    }
   }, [gameState])
   
   useEffect(() => {

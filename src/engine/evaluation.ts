@@ -1,6 +1,6 @@
 import { Board, PieceColor } from '../types/chess'
 
-const pieceValues: Record<string, number> = {
+export const pieceValues: Record<string, number> = {
   pawn: 100,
   knight: 320,
   bishop: 330,
@@ -78,6 +78,82 @@ const pstBlack: Record<string, number[][]> = Object.fromEntries(
 )
 
 // helper removed
+
+function inBounds(r: number, c: number): boolean {
+  return r >= 0 && r < 8 && c >= 0 && c < 8
+}
+
+function dangerFor(board: Board, kr: number, kc: number, color: PieceColor): number {
+  const enemy: PieceColor = color === 'white' ? 'black' : 'white'
+  let ring = 0
+  const kn = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]
+  for (const [dr, dc] of kn) {
+    const r = kr + dr, c = kc + dc
+    if (!inBounds(r,c)) continue
+    const p = board[r][c]
+    if (p && p.color === enemy && p.type === 'knight') ring++
+  }
+  const pr = enemy === 'white' ? -1 : 1
+  for (const dc of [-1, 1]) {
+    const r = kr + pr, c = kc + dc
+    if (!inBounds(r,c)) continue
+    const p = board[r][c]
+    if (p && p.color === enemy && p.type === 'pawn') ring++
+  }
+  let line = 0
+  const diag = [[-1,-1],[-1,1],[1,-1],[1,1]]
+  for (const [dr, dc] of diag) {
+    let r = kr + dr, c = kc + dc
+    while (inBounds(r,c)) {
+      const p = board[r][c]
+      if (p) {
+        if (p.color === enemy && (p.type === 'bishop' || p.type === 'queen')) line += 1
+        break
+      }
+      r += dr; c += dc
+    }
+  }
+  const orth = [[-1,0],[1,0],[0,-1],[0,1]]
+  for (const [dr, dc] of orth) {
+    let r = kr + dr, c = kc + dc
+    while (inBounds(r,c)) {
+      const p = board[r][c]
+      if (p) {
+        if (p.color === enemy && (p.type === 'rook' || p.type === 'queen')) line += 1
+        break
+      }
+      r += dr; c += dc
+    }
+  }
+  let open = 0
+  for (const fc of [kc - 1, kc, kc + 1]) {
+    if (fc < 0 || fc >= 8) continue
+    let hasFriendlyPawn = false
+    for (let r = 0; r < 8; r++) {
+      const p = board[r][fc]
+      if (p && p.type === 'pawn' && p.color === color) { hasFriendlyPawn = true; break }
+    }
+    if (!hasFriendlyPawn) open++
+  }
+  const s = ring * 12 + line * 20 + open * 8
+  return s
+}
+
+function kingDanger(board: Board): number {
+  let wk: [number, number] | null = null
+  let bk: [number, number] | null = null
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+    const p = board[r][c]
+    if (p && p.type === 'king') {
+      if (p.color === 'white') wk = [r, c]
+      else bk = [r, c]
+    }
+  }
+  let dw = 0, db = 0
+  if (wk) dw = dangerFor(board, wk[0], wk[1], 'white')
+  if (bk) db = dangerFor(board, bk[0], bk[1], 'black')
+  return -dw + db
+}
 
 function evaluatePawnStructure(board: Board): number {
   let s = 0
@@ -216,20 +292,33 @@ function kingSafety(board: Board): number {
 }
 
 export function evaluate(board: Board, turn: PieceColor): number {
-  let score = 0
+  let scoreMg = 0
+  let scoreEg = 0
+  let phase = 0
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
       const p = board[r][c]
       if (!p) continue
       const base = pieceValues[p.type]
       const pst = p.color === 'white' ? pstWhite[p.type][r][c] : pstBlack[p.type][r][c]
-      const s = base + pst
-      score += p.color === 'white' ? s : -s
+      const mg = base + pst
+      const eg = base + Math.floor(pst * 0.6)
+      scoreMg += p.color === 'white' ? mg : -mg
+      scoreEg += p.color === 'white' ? eg : -eg
+      if (p.type === 'pawn') phase += 0
+      else if (p.type === 'knight' || p.type === 'bishop') phase += 1
+      else if (p.type === 'rook') phase += 2
+      else if (p.type === 'queen') phase += 4
     }
   }
-  score += evaluatePawnStructure(board)
-  score += bishopPairBonus(board)
-  score += rookFileBonuses(board)
-  score += kingSafety(board)
-  return turn === 'white' ? score : -score
+  const mgExtras = evaluatePawnStructure(board) + bishopPairBonus(board) + rookFileBonuses(board) + kingSafety(board) * 2 + Math.floor(kingDanger(board) * 1.2)
+  const egExtras = evaluatePawnStructure(board) + bishopPairBonus(board) + rookFileBonuses(board) + Math.floor(kingSafety(board) * 0.6) + Math.floor(kingDanger(board) * 0.6)
+  scoreMg += mgExtras
+  scoreEg += egExtras
+  const maxPhase = 16
+  if (phase > maxPhase) phase = maxPhase
+  const egWeight = phase / maxPhase
+  const mgWeight = 1 - egWeight
+  const tapered = Math.floor(scoreMg * mgWeight + scoreEg * egWeight)
+  return turn === 'white' ? tapered : -tapered
 }

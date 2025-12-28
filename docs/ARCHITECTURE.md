@@ -65,7 +65,9 @@
 - UI in A11y testi komponent (ChessBoard, GameControls, dialogs) (`src/components/__tests__`).
 - Testi remija: `useChessGame.draw.test.ts` pokrivajo trojno ponovitev pozicije in 50 potez brez kmetov/zajemov (`src/hooks/__tests__/useChessGame.draw.test.ts`).
  - Test blokade: `useChessGame.end-lock.test.ts` potrdi, da se po zaključku igre nadaljnji premiki ignorirajo.
-- Pragovi pokritosti nastavljeni v `vitest.config.ts`.
+- Pragovi pokritosti nastavljeni v `vitest.config.ts`. Dodatni testi: `src/engine/__tests__/openingBook.test.ts`, `src/engine/__tests__/ai.timeout.test.ts`.
+ - Performančni test: `src/engine/__tests__/ai.timeout.test.ts` preverja časovno odzivnost.
+ - Slog testi: `src/engine/__tests__/openingBook.style.test.ts`.
 
 ## Razširljivost in vzdrževanje
 - Enotni SRP/DRY pomočniki (`buildMoveRecord`, `slidingMoves`) zmanjšujejo ponavljanje (`src/utils/chessUtils.ts:218`, `src/utils/moveValidation.ts:115`).
@@ -74,8 +76,14 @@
 
 ## Logika AI (brez Stockfisha)
 - `src/engine/evaluation.ts`: ocena položaja (material, PST), rezultat v centipawn.
-- `src/engine/search.ts`: minimax z alfa–beta, generiranje legalnih potez prek obstoječega `getValidMoves`, aplikacija poteze na kopiji plošče.
-- `src/engine/ai.ts`: `computeBestMove(state, depth, moveTimeMs)` z iterativnim poglabljanjem.
+- `src/engine/zobrist.ts`: Zobrist hash in TT vnosi (globina, ocena, PV poteza).
+- `src/engine/search.ts`: minimax z alfa–beta, killer/history premet, PVS (PV-search) in LMR (redukcije za pozne ne-zajeme), TT lookup/set.
+  - Premet: zajemi+SEE, killer/history, PV‑move iz TT, check bonus (lahka `isKingInCheck`) brez dragih status izračunov.
+  - Ekstenzije: check‑extension (+1 ply), terminalna detekcija mate/stalemate/draw z minimizacijo razdalje do mata.
+  - Quiescence: na listju izvede “stand pat” oceno in razširi samo zajeme z alfa‑beta, kar prepreči horizonta efekt pri taktikah.
+- `src/engine/ai.ts`: `computeBestMove(state, depth, moveTimeMs)` z iterativnim poglabljanjem, aspiration windows in globalno TT persistenco.
+- `src/engine/openingBook.ts`: opening book `getBookMove(state)`.
+  - Lazy prebere `public/opening-book.json` (PGN→JSON) in izbira potez po zgodovini in `aiSettings.style`.
 
 ## Omejitve trenutne zasnove
 - Brez mrežnega igranja ali AI; lokalna igra dveh igralcev.

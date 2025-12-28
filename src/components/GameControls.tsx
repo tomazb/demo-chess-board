@@ -9,6 +9,7 @@ const GameControls: React.FC<GameControlsProps> = ({
   onRedoMove,
   onToggleOrientation,
   onToggleMode,
+  onSetAiSettings,
 }) => {
   const winnerLabel = gameState.currentPlayer === 'white' ? '⚫ Black' : '⚪ White'
   const [showResetDialog, setShowResetDialog] = useState(false)
@@ -63,6 +64,11 @@ const GameControls: React.FC<GameControlsProps> = ({
           <span className="text-gray-600">Način igre:</span>
           <span className="font-semibold">{gameState.mode === 'pvai' ? 'Človek vs AI' : 'Človek vs Človek'}</span>
         </div>
+        {gameState.mode === 'pvai' && gameState.aiThinking && (
+          <div className="w-full bg-yellow-100 text-yellow-800 border border-yellow-300 rounded-lg p-2 text-center">
+            🤖 AI razmišlja...
+          </div>
+        )}
         <button
           onClick={onToggleMode}
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
@@ -96,6 +102,7 @@ const GameControls: React.FC<GameControlsProps> = ({
           ↷ Redo Move
         </button>
       </div>
+
 
       {/* Move History */}
       <div>

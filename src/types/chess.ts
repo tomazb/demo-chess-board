@@ -73,7 +73,9 @@ export interface GameState {
     depth?: number;
     moveTimeMs?: number;
     autoAnalyze?: boolean;
+    style?: 'aggressive' | 'positional' | 'balanced';
   };
+  aiThinking?: boolean;
 }
 
 // Component props interfaces
@@ -99,6 +101,7 @@ export interface GameControlsProps {
   onRedoMove: () => void;
   onToggleOrientation?: () => void;
   onToggleMode?: () => void;
+  onSetAiSettings?: (settings: Partial<NonNullable<GameState['aiSettings']>>) => void;
 }
 
 
@@ -128,7 +131,9 @@ export type GameAction =
   | { type: 'REDO_MOVE' }
   | { type: 'SET_VALID_MOVES'; moves: Square[] }
   | { type: 'UPDATE_GAME_STATUS'; status: GameStatus }
+  | { type: 'SET_AI_THINKING'; value: boolean }
   | { type: 'SET_EN_PASSANT_TARGET'; target: Square | null }
   | { type: 'TOGGLE_ORIENTATION' }
   | { type: 'TOGGLE_MODE' }
   | { type: 'SET_AI_SETTINGS'; settings: Partial<NonNullable<GameState['aiSettings']>> };
+  

@@ -12,7 +12,9 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "test:quick": "vitest run src/utils/__tests__ src/hooks/__tests__/useChessGame*.test.ts",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "changelog:update": "node scripts/changelog.mjs update",
+    "changelog:check": "node scripts/changelog.mjs check"
   },
   "dependencies": {
     "react": "^18.2.0",

@@ -28,6 +28,15 @@ This file provides guidance to agents when working with code in this repository.
   - UI tests cover ChessBoard, GameControls, ConfirmationDialog, ErrorBoundary, and DnD flows (ChessSquare/ChessPiece)
   - Accessibility tests: jest-axe basic checks; keyboard-only flows (Enter/Space), touch tap-to-move; visual feedback and DnD edge cases
 
+## Testno voden razvoj (TDD)
+
+- Za vsako novo funkcijo ali popravke napak najprej napiši test, ki sprva pade; nato implementiraj kodo in poskrbi, da test uspe.
+- Vsaka sprememba vedenja mora biti pokrita s testom (novim ali posodobljenim). PR-ji brez ustreznih testov se ne smejo združiti.
+- Ohranite ali povečajte pokritost: `statements ≥ 80%`, `functions ≥ 80%`, `lines ≥ 80%`, `branches ≥ 70%`.
+- Pred commitom se poganjajo `lint` in `npm run test:quick`; pred združitvijo poganjaj `npm test` in `npm run test:coverage`.
+- Testi naj bodo locirani v `src/components/__tests__/`, `src/hooks/__tests__/`, `src/utils/__tests__/`; po potrebi dodaj nove mape.
+- Pri regresijah najprej napiši reprodukcijski test in ga pusti padati, dokler napaka ni odpravljena.
+
 ## Architecture overview
 
 - Stack and tooling
@@ -84,4 +93,9 @@ This file provides guidance to agents when working with code in this repository.
 - Husky pre-commit hook runs lint and npm run test:quick (install via: npm run prepare)
 - CI: GitHub Actions runs lint + tests with coverage; Codecov upload is conditional on CODECOV_TOKEN secret (badge in README)
 - README.md includes quickstart (npm install, npm run dev/build/preview/lint) and feature overview
+ 
+## Git smernice
+
+- Pogosto delaj `git commit` po smiselnih, majhnih korakih.
+- Sporočila commitov naj bodo jasna, opisna in smiselna.
 

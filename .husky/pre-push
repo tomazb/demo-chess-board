@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+npm run changelog:check || { echo "CHANGELOG.md ni posodobljen. Zaženite 'npm run changelog:update' in dodajte spremembe."; exit 1; }
+
